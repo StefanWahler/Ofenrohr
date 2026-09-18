@@ -8,7 +8,7 @@ Gilt zusammen mit [`pflichtenheft.md`](pflichtenheft.md) Beschluss B4.
 
 ## 1. Datei `.ofenrohr`
 
-Eine Blick-Datei ist **UTF-8-JSON**. Dateiname typischerweise `blick.ofenrohr`. Es gibt keine ZIP-Hülle in v1 (ein Messenger-Schritt, ein MIME-Typ).
+Eine Blick-Datei ist **UTF-8-JSON**. Dateiname: Stamm aus `name` (sonst `ofenrohr`), Endung `.ofenrohr`. Es gibt keine ZIP-Hülle in v1 (ein Messenger-Schritt, ein MIME-Typ).
 
 MIME-Typ beim Teilen: `application/json` (breit kompatibel). Eigener Typ `application/vnd.ofenrohr.blick+json` ist für später reserviert.
 
@@ -128,7 +128,8 @@ Keine weiteren Verben. Keine Analytics-Events.
 
 - Kein HTTP-Client zum Relay.
 - Kein Docker-Compose-Zwang im App-Repo.
-- Keine Deep-Links `ofenrohr://`, bis ein Relay oder eine Datei-Association das braucht.
+- Keine Deep-Links `ofenrohr://` in der Studie.
+- Datei-Association `.ofenrohr` erst im Standalone-Build, nicht in Expo Go.
 
 ---
 
@@ -138,4 +139,4 @@ Keine weiteren Verben. Keine Analytics-Events.
 2. „Mit Ofenrohr öffnen“ bzw. in der App **Blick empfangen** (Dokumentenwähler).
 3. Parser prüft Schema und Größe, dann Ofenrohr-Ansicht.
 
-Solange Expo Go keine eigene Datei-Association hat, ist der Dokumentenwähler der vorgesehene Weg.
+Solange Expo Go keine eigene Datei-Association hat, ist der Dokumentenwähler der vorgesehene Weg. Ein späterer nativer Build darf `.ofenrohr` direkt öffnen; das Schema bleibt dasselbe.

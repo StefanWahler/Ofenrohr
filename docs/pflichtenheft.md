@@ -2,10 +2,11 @@
 
 | Feld | Wert |
 | --- | --- |
-| Version | 0.1 |
+| Version | 0.2 |
 | Stand | 2026-09-18 |
 | Status | lebendiges Paper; Beschlüsse unten gelten, bis sie hier geändert werden |
 | Arbeitsverzeichnis | `C:\Developement\Ofenrohr` |
+| Git | https://github.com/StefanWahler/Ofenrohr (öffentlich, Branch `main`) |
 
 Dieses Dokument ist die Entscheidungsgrundlage. Chat-Verlauf ersetzt es nicht. Neue Beschlüsse und verworfene Optionen werden hier nachgetragen.
 
@@ -37,13 +38,13 @@ Gültig für die Machbarkeitsstudie, bis dieses Paper sie ändert.
 | B1 | Darstellung | **Hybrid.** Drei Hintergründe in der Rohröffnung: **Schwarz**, **Kamera** (Rückseite, Fallback Schwarz ohne Erlaubnis), **Gebirge** (festes CC0-Alpenpanorama als Kugelinnenfläche). Das mitgesendete Foto hängt als Pin auf derselben Blickrichtung. Kein farbiger Halo, kein stilisiertes Overlay-Gebirge. Eigenes 360° in der Datei ist später optional, nicht v1. |
 | B2 | Sensor v1 | **Lage + Himmelsrichtung.** Blickrichtung ist die Geräterückseite als Punkt auf einer Kugel (ENU). Kompass (Magnetometer, kippkompensiert) plus Neigung. Alte Dateien ohne `look` bleiben neigungsbasiert. |
 | B3 | Bildführung | **Winkelfehlerabhängig**, nicht binär. Das Foto rutscht in der Kreisöffnung (Kugel-Parallaxe), ohne Helligkeits-Fade. Weit daneben nur der gewählte Hintergrund. |
-| B4 | Teilen | **Server-optional, payload-first.** v1 teilt eine lokale `.ofenrohr`-Datei über die System-Teilen-Funktion. Ein Relay wird spezifiziert (`docs/relay-api.md`), nicht öffentlich betrieben. |
-| B5 | Technologie | **Expo (React Native) + TypeScript**, Testen mit Expo Go. Kein EAS als Abhängigkeit. Nur FOSS-Komponenten. |
+| B4 | Teilen | **Server-optional, payload-first.** v1 teilt eine lokale `.ofenrohr`-Datei über die System-Teilen-Funktion. Dateiname aus dem Anzeigenamen (`Name.ofenrohr`). Ein Relay wird spezifiziert (`docs/relay-api.md`), nicht öffentlich betrieben. In Expo Go öffnet man die Datei über **Blick empfangen** (Dokumentenwähler). Eigene Datei-Association `.ofenrohr` erst im Standalone-Build. |
+| B5 | Technologie | **Expo SDK 57** (React Native + TypeScript), Testen mit Expo Go **57**. Kein EAS als Abhängigkeit. Nur FOSS-Komponenten. Quelltext: GitHub wie oben. |
 | B6 | Studie-Grenzen | Keine Accounts, kein Feed, kein Push, kein Tracking, keine Bezahlung, kein Store-Release, kein öffentlicher Bilderserver. Kamera nur als optionaler Hintergrund, kein AR-Labeling. |
 | B7 | Sprache | UI und Paper **deutsch**. |
 | B8 | Lizenz | App und Docs: **MIT**. Assets nur SIL/OFL, CC oder selbst erstellt. Panorama: Poly Haven „Alps Field“, CC0. |
-| B9 | Erzeugen | **Foto aus der Mediathek**, dann Handy halten und **Lage per Knopf übernehmen**. Kein Pflicht-Preset. Empfänger muss dieselbe Lage treffen. |
-| B10 | Blick.view | Datei speichert `sensors` (Lage vs. Finger) und `background` (`black` / `camera` / `panorama`). Empfänger kann in der Ansicht umschalten. Sensor verweigert → Finger. Kamera verweigert → Schwarz. |
+| B9 | Erzeugen | **Foto aus der Mediathek**, optional **Name**, dann Handy halten und **Lage per Knopf übernehmen**. Sender legt Steuerung und Hintergrund für den Empfänger fest. Kein Pflicht-Preset in der Erzeugen-UI. Empfänger muss dieselbe Blickrichtung treffen. |
+| B10 | Blick.view | Datei speichert `sensors` (Lage vs. Finger) und `background` (`black` / `camera` / `panorama`). Empfänger kann in der Ansicht umschalten (Test). Sensor verweigert → Finger. Kamera verweigert → Schwarz (Umschalter bleibt auf Kamera). **Schieben im Kreis geht immer;** der erste Fingerstrich schaltet von Sensor auf Finger, ohne Sprung der Blickrichtung. |
 
 ### 2.1 Begründung B1 (Darstellung)
 
@@ -80,7 +81,7 @@ Ohne Kompass war die **Himmelsrichtung** früher nicht bestimmbar. Das gilt nur 
 | Boden | Rückseite zum Boden, Bildschirm nach oben | `{ x: 0, y: 0, z: -1 }` |
 | Brust | Hochkant, Bildschirm zum Gesicht, Horizont | `{ x: 0, y: -1, z: 0 }` |
 
-Zusätzlich (Hauptweg, B9): **aktuelle Lage übernehmen** — Sender hält das Gerät und speichert den gemessenen Gravitationvektor per Knopf. Presets bleiben nur für Demos (Gebirge / Beispieldatei).
+Zusätzlich (Hauptweg, B9): **aktuelle Lage übernehmen** — Sender hält das Gerät und speichert den gemessenen Blickvektor (Lage + Kompass) per Knopf. Presets bleiben nur für Demos (Home „Ins Gebirge schauen“, `examples/gebirge.ofenrohr`: Zenit, Hintergrund Panorama).
 
 ### 3.3 Abbildung des Winkelfehlers
 
@@ -103,6 +104,10 @@ Sender erstellt Blick → .ofenrohr-Datei
 Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 ```
 
+Dateiname: Stamm aus `name` (Pfadzeichen gestrichen), sonst `ofenrohr`. Endung immer `.ofenrohr`.
+
+In Expo Go gibt es keine App-Datei-Association. Empfangsweg: System-Teilen → Datei sichern → in der App **Blick empfangen**. Ein späterer Store-/Sideload-Build darf `.ofenrohr` als Typ registrieren; das ändert das Dateiformat nicht.
+
 Öffentlicher Relay: nur wenn es einen belastbaren Grund gibt (kurze Links, Ablauf, Rückruf). Gegenmittel schon in der Spezifikation: Ablauf, Größenlimit, Server abschaltbar.
 
 ---
@@ -118,7 +123,7 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 
 **Expo Application Services** (Cloud-Build) ist optional und **keine** Abhängigkeit. `eas.json` wird nicht vorausgesetzt.
 
-**Expo-Go-Grenzen, die wir akzeptieren:** eigene Native-Module und manches AR gehen erst im Dev-Build. Sensoren, Bilder, Teilen, geschlossenes Rohr: in Expo Go machbar.
+**Expo-Go-Grenzen, die wir akzeptieren:** eigene Native-Module, Datei-Association und manches AR gehen erst im Dev-/Standalone-Build. Sensoren, Mediathek, Teilen, Kamera-Hintergrund, festes Panorama, Fingersteuerung: in Expo Go SDK 57 machbar. Store-Expo-Go und Projekt-SDK müssen dieselbe Major-Version sein.
 
 **Außerhalb von Softwarelizenzen:** Apple- und Google-Store-Konten sind Plattformgebühren. Für die Studie reichen Expo Go, Sideload und interne Builds.
 
@@ -126,16 +131,17 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 
 ## 6. Funktionsumfang der Studie
 
-**Soll (Stand 2026-09-18, im Repo):**
+**Soll (Stand 2026-09-18, im Repo, getestet in Expo Go):**
 
-1. Dieses Paper als lebendiges Pflichtenheft.
-2. Expo-App: Lage lesen, Zielrichtung (Preset „oben“ + frei einfrieren), Winkelanzeige zum Debuggen.
-3. Ofenrohr-UI: Kreisöffnung ohne Halo; Foto als Pin; Hintergründe Schwarz / Kamera / Gebirge.
-4. Ofenrohr erzeugen: Foto aus der Mediathek, Lage per Knopf übernehmen, Steuerung und Hintergrund wählen, teilen.
-5. Blick als Datei exportieren/importieren (System-Teilen). `view` in der Datei.
-6. Leerer Blick: kein Foto, optional Alpenpanorama in der Kugel.
+1. Dieses Paper als lebendiges Pflichtenheft; Quelltext auf GitHub.
+2. Expo-App SDK 57: Lage + Kompass (ENU), Debug-HUD in der Rohransicht (an/aus).
+3. Ofenrohr-UI: Kreisöffnung ohne Halo; Foto als Pin; Hintergründe Schwarz / Kamera / Gebirge (Poly Haven Alps Field, CC0, `assets/panoramas/`).
+4. Steuerung: Sensoren oder Finger; Schieben im Kreis übernimmt auf Finger. Test-Umschalter während der Ansicht.
+5. Ofenrohr erzeugen: Name, Foto aus der Mediathek, Lage per Knopf, Steuerung und Hintergrund wählen, teilen.
+6. Blick als `.ofenrohr` exportieren/importieren (System-Teilen / Dokumentenwähler). Felder `name`, `look`, `view`.
+7. Demo „Ins Gebirge schauen“: leerer Blick, Zenit, Panorama-Hintergrund.
 
-**Nicht in der Studie:** Accounts, Feed, Freundeslisten, Push, Tracking, Bezahlfunktionen, Store-Release, öffentlicher Bilderserver, eigenes 360° in der Blick-Datei.
+**Nicht in der Studie:** Accounts, Feed, Freundeslisten, Push, Tracking, Bezahlfunktionen, Store-Release, öffentlicher Bilderserver, eigenes 360° in der Blick-Datei, Datei-Association in Expo Go.
 
 ---
 
@@ -146,8 +152,10 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 | O1 | App-Name | Arbeitstitel Ofenrohr; Tonalität (derb vs. still) offen. |
 | O2 | Leere | Erledigt: Hintergrund wählbar (schwarz / Kamera / festes Alpenpanorama). |
 | O3 | Richtung aufnehmen | Erledigt (B9): Sender hält das Gerät und übernimmt die Lage per Knopf. |
-| O4 | Barrierefreiheit | Reine Sensor-UI schließt Nutzung aus. Fallback „Bild trotzdem zeigen“ wäre anti-Pointe. Später klären. |
+| O4 | Barrierefreiheit | Fingersteuerung ist der Fallback (B10). „Bild trotzdem zeigen“ bleibt anti-Pointe und kein v1-Weg. |
 | O5 | Relatives Gyro-Heading | Könnte „Wand vor dir“ ohne Kompass in einer Sitzung simulieren. Nicht v1. |
+| O6 | Eigenes 360° | Mitgesendetes Panorama (späterer Monetarisierungs-Hook) nicht v1; App-Panorama bleibt fest. |
+| O7 | Datei-Association | `.ofenrohr` im Standalone-Build öffnen. Expo Go: nur Dokumentenwähler. |
 
 ---
 
@@ -160,3 +168,4 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 | 2026-09-18 | B9: Erzeugen = Mediathek-Foto + Lage per Knopf; Empfänger muss dieselbe Lage treffen. |
 | 2026-09-18 | Bild ohne Helligkeits-Fade, nur Rand-Clip. Blickrichtung volle Kugel (Kompass + Höhe). |
 | 2026-09-18 | B1/B10: Hintergründe Schwarz, Kamera, CC0-Alpenpanorama; Fingersteuerung; `view` in der Datei. Halo entfernt. |
+| 2026-09-18 | v0.2: GitHub-Remote; SDK 57; Name in Datei/Dateiname; Fingerstrich übernimmt von Sensor; Datei-Association erst Standalone; O4/O6/O7. |
