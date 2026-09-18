@@ -34,18 +34,20 @@ Gültig für die Machbarkeitsstudie, bis dieses Paper sie ändert.
 
 | ID | Thema | Beschluss |
 | --- | --- | --- |
-| B1 | Darstellung | **Hybrid, Stufen.** Jetzt: geschlossenes Rohr (kein Kamerabild, keine Kamera-Berechtigung). Später: optionale Kameradurchsicht, dieselbe Richtungsphysik. |
-| B2 | Sensor v1 | **Lage relativ zur Schwerkraft.** Presets und „Lage einfrieren“ speichern den Gravitationvektor. Kompass-Azimut ist in der Datenstruktur vorgesehen, in v1 nicht nötig. |
-| B3 | Bildführung | **Winkelfehlerabhängig**, nicht binär. Parallaxe im Rohr; weit daneben nur Rohrinneres und Gebirge. |
+| B1 | Darstellung | **Hybrid.** Drei Hintergründe in der Rohröffnung: **Schwarz**, **Kamera** (Rückseite, Fallback Schwarz ohne Erlaubnis), **Gebirge** (festes CC0-Alpenpanorama als Kugelinnenfläche). Das mitgesendete Foto hängt als Pin auf derselben Blickrichtung. Kein farbiger Halo, kein stilisiertes Overlay-Gebirge. Eigenes 360° in der Datei ist später optional, nicht v1. |
+| B2 | Sensor v1 | **Lage + Himmelsrichtung.** Blickrichtung ist die Geräterückseite als Punkt auf einer Kugel (ENU). Kompass (Magnetometer, kippkompensiert) plus Neigung. Alte Dateien ohne `look` bleiben neigungsbasiert. |
+| B3 | Bildführung | **Winkelfehlerabhängig**, nicht binär. Das Foto rutscht in der Kreisöffnung (Kugel-Parallaxe), ohne Helligkeits-Fade. Weit daneben nur der gewählte Hintergrund. |
 | B4 | Teilen | **Server-optional, payload-first.** v1 teilt eine lokale `.ofenrohr`-Datei über die System-Teilen-Funktion. Ein Relay wird spezifiziert (`docs/relay-api.md`), nicht öffentlich betrieben. |
 | B5 | Technologie | **Expo (React Native) + TypeScript**, Testen mit Expo Go. Kein EAS als Abhängigkeit. Nur FOSS-Komponenten. |
-| B6 | Studie-Grenzen | Keine Accounts, kein Feed, kein Push, kein Tracking, keine Bezahlung, kein Store-Release, kein öffentlicher Bilderserver, kein Kameramodus. |
+| B6 | Studie-Grenzen | Keine Accounts, kein Feed, kein Push, kein Tracking, keine Bezahlung, kein Store-Release, kein öffentlicher Bilderserver. Kamera nur als optionaler Hintergrund, kein AR-Labeling. |
 | B7 | Sprache | UI und Paper **deutsch**. |
-| B8 | Lizenz | App und Docs: **MIT**. Assets nur SIL/OFL, CC oder selbst erstellt. |
+| B8 | Lizenz | App und Docs: **MIT**. Assets nur SIL/OFL, CC oder selbst erstellt. Panorama: Poly Haven „Alps Field“, CC0. |
+| B9 | Erzeugen | **Foto aus der Mediathek**, dann Handy halten und **Lage per Knopf übernehmen**. Kein Pflicht-Preset. Empfänger muss dieselbe Lage treffen. |
+| B10 | Blick.view | Datei speichert `sensors` (Lage vs. Finger) und `background` (`black` / `camera` / `panorama`). Empfänger kann in der Ansicht umschalten. Sensor verweigert → Finger. Kamera verweigert → Schwarz. |
 
 ### 2.1 Begründung B1 (Darstellung)
 
-Die Magie steckt in Sensor plus Rohr-Parallaxe, nicht in AR-Kamera. Kamera erhöht Aufwand (Berechtigungen, Belichtung, Datenschutz) und ist für den Machbarkeitsbeweis entbehrlich.
+Die Magie steckt in Sensor plus Rohr-Parallaxe. Kamera ist ein wählbarer Hintergrund, kein Pflicht-AR. Ohne Erlaubnis bleibt die Öffnung schwarz. Das Gebirge ist ein festes, freies 360°-Bild an der Kugelinnenfläche — nicht mitgesendet, damit die Datei klein bleibt.
 
 ### 2.2 Begründung B4 (Teilen)
 
@@ -65,10 +67,10 @@ Messenger, AirDrop, Mail und USB sind die Infrastruktur der Nutzer, nicht unsere
 
 Ein Sender wählt einen Modus:
 
-1. **Lage** (v1, ohne Kompass): z. B. senkrecht nach oben, flach auf den Boden, hochkant vor die Brust. Zuverlässig indoor. Speichert den normalisierten Gravitationvektor im Gerätekoordinatensystem von Expo (`x` rechts, `y` oben, `z` aus dem Bildschirm zum Nutzer).
-2. **Lage + Azimut** (später): z. B. nach Norden, 45° über dem Horizont. Braucht Magnetometer und Kalibrierhinweis (Acht schwenken). Feld in der Blick-Datei bereits optional.
+1. **Lage** (ältere Dateien ohne `look`): nur Neigung zur Schwerkraft.
+2. **Lage + Azimut** (Standard): Magnetometer plus Gravitation, Blickrichtung der Rückseite als ENU-Vektor. Wie eine Planeten-App: nur wer Höhe *und* Himmelsrichtung trifft, sieht das Bild. Indoor kann der Kompass stören; Acht schwenken, von Metall fernhalten.
 
-Ohne Kompass ist die **Himmelsrichtung** nicht bestimmbar. „Bild an der Wand vor dir“ ist in v1 nicht heading-stabil; „Handy so kippen“ schon. Das ist Absicht, kein Fehler.
+Ohne Kompass war die **Himmelsrichtung** früher nicht bestimmbar. Das gilt nur noch für alte Dateien ohne `look`.
 
 ### 3.2 Presets (v1)
 
@@ -78,15 +80,15 @@ Ohne Kompass ist die **Himmelsrichtung** nicht bestimmbar. „Bild an der Wand v
 | Boden | Rückseite zum Boden, Bildschirm nach oben | `{ x: 0, y: 0, z: -1 }` |
 | Brust | Hochkant, Bildschirm zum Gesicht, Horizont | `{ x: 0, y: -1, z: 0 }` |
 
-Zusätzlich: **aktuelle Lage einfrieren** — speichert den gemessenen Gravitationvektor.
+Zusätzlich (Hauptweg, B9): **aktuelle Lage übernehmen** — Sender hält das Gerät und speichert den gemessenen Gravitationvektor per Knopf. Presets bleiben nur für Demos (Gebirge / Beispieldatei).
 
 ### 3.3 Abbildung des Winkelfehlers
 
-- Kleines Winkelfenster: Bild füllt die Öffnung.
-- Beim Schwenken: Bild wandert in der Kreisöffnung (2D-Parallaxe aus der Differenz der Gravitationvektoren in der Geräte-XY-Ebene), Rohrwand wird sichtbar.
-- Weit daneben: nur dunkles Rohrinneres und stilisiertes Gebirge.
+- Kleines Winkelfenster: das mitgesendete Foto sitzt in der Öffnung.
+- Beim Schwenken: Foto wandert in der Kreisöffnung (Projektion auf die Blickkugel), Rohrwand / Hintergrund wird sichtbar.
+- Weit daneben: nur der gewählte Hintergrund (schwarz, Kamera oder Alpenpanorama). Kein farbiger Hof.
 
-Technisch reicht 2D-Parallaxe. Ein 3D-Rohr (etwa später Three.js / expo-gl) ist optional, nicht Voraussetzung.
+Technisch reicht ein Equirectangular-Ausschnitt für die schmale Rohr-FOV. Ein 3D-Mesh (etwa später Three.js / expo-gl) ist optional.
 
 ---
 
@@ -108,7 +110,7 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 ## 5. Technologie und FOSS-Leitplanken
 
 - Stack: Expo, React Native, React — MIT / Apache-2.0.
-- Sensoren: `expo-sensors`. Bilder: `expo-image-picker`. Dateien: `expo-file-system`, `expo-sharing`, `expo-document-picker`.
+- Sensoren: `expo-sensors`. Bilder: `expo-image-picker`. Dateien: `expo-file-system`, `expo-sharing`, `expo-document-picker`. Optionaler Kamerahintergrund: `expo-camera`.
 - Keine Firebase, keine Google-Maps-SDK, keine proprietären Analytics-/Crash-Dienste.
 - Schrift, Icons, Texturen: nur SIL/OFL, CC oder selbst erstellt.
 - Falls später Karte: OpenStreetMap + FOSS-Renderer.
@@ -124,16 +126,16 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 
 ## 6. Funktionsumfang der Studie
 
-**Soll (Reihenfolge, erledigt bzw. zu erledigen im Repo):**
+**Soll (Stand 2026-09-18, im Repo):**
 
 1. Dieses Paper als lebendiges Pflichtenheft.
 2. Expo-App: Lage lesen, Zielrichtung (Preset „oben“ + frei einfrieren), Winkelanzeige zum Debuggen.
-3. Ofenrohr-UI: Vignette, Bild erscheint/verschwindet mit Parallaxe.
-4. Blick erstellen: Bild wählen, Richtung setzen, Kurztext.
-5. Blick als Datei exportieren/importieren (System-Teilen).
-6. Leerer Blick / Gebirge als bewusste Pointe.
+3. Ofenrohr-UI: Kreisöffnung ohne Halo; Foto als Pin; Hintergründe Schwarz / Kamera / Gebirge.
+4. Ofenrohr erzeugen: Foto aus der Mediathek, Lage per Knopf übernehmen, Steuerung und Hintergrund wählen, teilen.
+5. Blick als Datei exportieren/importieren (System-Teilen). `view` in der Datei.
+6. Leerer Blick: kein Foto, optional Alpenpanorama in der Kugel.
 
-**Nicht in der Studie:** Accounts, Feed, Freundeslisten, Push, Tracking, Bezahlfunktionen, Store-Release, öffentlicher Bilderserver, Kameramodus.
+**Nicht in der Studie:** Accounts, Feed, Freundeslisten, Push, Tracking, Bezahlfunktionen, Store-Release, öffentlicher Bilderserver, eigenes 360° in der Blick-Datei.
 
 ---
 
@@ -142,8 +144,8 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 | ID | Thema | Anmerkung |
 | --- | --- | --- |
 | O1 | App-Name | Arbeitstitel Ofenrohr; Tonalität (derb vs. still) offen. |
-| O2 | Leere | Wie stark Gebirge vs. nur rostiges Rohr. Studie: beides, Gebirge dezent am Ende des Rohrs. |
-| O3 | Richtung aufnehmen | Studie: ja, Sender hält das eigene Gerät und friert ein, zusätzlich Presets. |
+| O2 | Leere | Erledigt: Hintergrund wählbar (schwarz / Kamera / festes Alpenpanorama). |
+| O3 | Richtung aufnehmen | Erledigt (B9): Sender hält das Gerät und übernimmt die Lage per Knopf. |
 | O4 | Barrierefreiheit | Reine Sensor-UI schließt Nutzung aus. Fallback „Bild trotzdem zeigen“ wäre anti-Pointe. Später klären. |
 | O5 | Relatives Gyro-Heading | Könnte „Wand vor dir“ ohne Kompass in einer Sitzung simulieren. Nicht v1. |
 
@@ -154,3 +156,7 @@ Empfänger öffnet Datei in der App → Ofenrohr-Ansicht
 | Datum | Änderung |
 | --- | --- |
 | 2026-09-18 | Erstfassung aus der Machbarkeitsdiskussion. Beschlüsse B1–B8. |
+| 2026-09-18 | Studie-App (Expo, Expo Go) und Dateiformat `.ofenrohr` ergänzt. Relay nur als Spezifikation. |
+| 2026-09-18 | B9: Erzeugen = Mediathek-Foto + Lage per Knopf; Empfänger muss dieselbe Lage treffen. |
+| 2026-09-18 | Bild ohne Helligkeits-Fade, nur Rand-Clip. Blickrichtung volle Kugel (Kompass + Höhe). |
+| 2026-09-18 | B1/B10: Hintergründe Schwarz, Kamera, CC0-Alpenpanorama; Fingersteuerung; `view` in der Datei. Halo entfernt. |

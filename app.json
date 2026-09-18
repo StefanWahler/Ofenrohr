@@ -2,16 +2,22 @@
   "expo": {
     "name": "Ofenrohr",
     "slug": "Ofenrohr",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#080604",
+    "primaryColor": "#c47848",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMotionUsageDescription": "Ofenrohr liest die Lage des Geräts, damit ein Bild nur in der richtigen Richtung sichtbar ist.",
+        "NSCameraUsageDescription": "Ofenrohr kann die Rückkamera als Hintergrund des Rohrs zeigen, wenn der Blick das vorsieht."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1a100c",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -20,6 +26,29 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-sharing",
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Ofenrohr liest die Lage des Geräts, damit ein Bild nur in der richtigen Richtung sichtbar ist."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ofenrohr verwendet ein Foto aus deiner Bibliothek als Blick durchs Ofenrohr."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Ofenrohr kann die Rückkamera als Hintergrund des Rohrs zeigen, wenn der Blick das vorsieht.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
+    ]
   }
 }

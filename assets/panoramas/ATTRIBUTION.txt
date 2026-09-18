@@ -1,0 +1,9 @@
+Alps Field
+Author: Andreas Mischok
+Source: https://polyhaven.com/a/alps_field
+Wikimedia: https://commons.wikimedia.org/wiki/File:Alps_field_-_Panorama_(Andreas_Mischok_via_Poly_Haven).jpg
+License: Creative Commons CC0 1.0 Universal (public domain dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Bundled as a 2048px-wide JPEG (equirectangular 2:1) for the inner sphere / Gebirge backdrop.
+Attribution is not required under CC0; kept for provenance.

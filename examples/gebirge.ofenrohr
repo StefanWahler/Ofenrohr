@@ -1,0 +1,17 @@
+{
+  "schema": "ofenrohr.blick.v1",
+  "createdAt": "2026-09-18T00:00:00.000Z",
+  "name": "Gebirge",
+  "instruction": "Rückseite zum Himmel, Bildschirm zu dir.",
+  "target": {
+    "mode": "attitude+azimuth",
+    "gravity": { "x": 0, "y": 0, "z": 1 },
+    "azimuthDeg": null,
+    "look": { "x": 0, "y": 0, "z": 1 }
+  },
+  "view": {
+    "sensors": true,
+    "background": "panorama"
+  },
+  "image": null
+}

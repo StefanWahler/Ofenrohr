@@ -18,11 +18,17 @@ MIME-Typ beim Teilen: `application/json` (breit kompatibel). Eigener Typ `applic
 {
   "schema": "ofenrohr.blick.v1",
   "createdAt": "2026-09-18T00:00:00.000Z",
+  "name": "Gebirge",
   "instruction": "Halt die Rückseite senkrecht zum Himmel.",
   "target": {
-    "mode": "attitude",
+    "mode": "attitude+azimuth",
     "gravity": { "x": 0, "y": 0, "z": 1 },
-    "azimuthDeg": null
+    "azimuthDeg": null,
+    "look": { "x": 0, "y": 0, "z": 1 }
+  },
+  "view": {
+    "sensors": true,
+    "background": "panorama"
   },
   "image": null
 }
@@ -32,11 +38,16 @@ MIME-Typ beim Teilen: `application/json` (breit kompatibel). Eigener Typ `applic
 | --- | --- | --- |
 | `schema` | ja | Genau `ofenrohr.blick.v1`. Unbekannte Schema-Werte: Datei ablehnen. |
 | `createdAt` | ja | ISO-8601, UTC. Nur Metadaten, keine Gültigkeit. |
+| `name` | nein | Anzeigename, max. 80 Zeichen. Fehlt oder leer: „Ofenrohr“. |
 | `instruction` | ja | Kurzanleitung, max. 280 Zeichen, darf leer sein (`""`). |
-| `target.mode` | ja | `attitude` (v1) oder `attitude+azimuth` (v1 lesen, Azimut ignorieren). |
-| `target.gravity` | ja | Normalisierter Gravitationvektor im Expo-Geräteframe. Nicht alle null. |
-| `target.azimuthDeg` | nein | 0–360, geografisch/magnetisch noch nicht festgelegt. v1: ignorieren. |
-| `image` | ja | `null` = leerer Blick (Gebirge). Sonst Objekt unten. |
+| `target.mode` | ja | `attitude` (nur Neigung, alte Dateien) oder `attitude+azimuth` (Kugel / Planeten-App). |
+| `target.gravity` | ja | Gravitationvektor im Expo-Geräteframe. Nicht alle null. |
+| `target.azimuthDeg` | nein | Magnetische Himmelsrichtung 0–360, 0 = Nord. |
+| `target.look` | nein bei alten Dateien, ja bei neuen | Einheitsvektor ENU: `x` Ost, `y` Nord, `z` oben. Richtung der Geräterückseite. Das Foto hängt an diesem Punkt auf der Kugel. |
+| `view` | nein | Empfänger-Voreinstellung. Fehlt: Sensoren an, Hintergrund schwarz. |
+| `view.sensors` | nein | `true` Lage/Kompass, `false` Finger. Ohne Sensorerlaubnis immer Finger. |
+| `view.background` | nein | `black` \| `camera` \| `panorama`. Kamera ohne Erlaubnis → schwarz. `panorama` ist das feste App-Alpenbild, kein mitgesendetes 360°. |
+| `image` | ja | `null` = leerer Blick. Sonst Objekt unten. |
 
 Bildobjekt:
 
@@ -54,7 +65,7 @@ Unbekannte zusätzliche Felder: ignorieren (Vorwärtskompatibilität).
 
 ### 1.3 Leerer Blick
 
-`image: null` ist gültig und gewollt: Empfänger schaut ins Gebirge. Das ist die Redensart als Datei.
+`image: null` ist gültig und gewollt: Empfänger sieht keinen Pin, nur den gewählten Hintergrund (beim Demo-Gebirge das Alpenpanorama). Das ist die Redensart als Datei.
 
 ---
 
